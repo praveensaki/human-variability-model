@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Human Variability Specification Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: engineering worksheet, calm, precise, a safety analyst's tool
+   IDEA: a SOTIF hazard worksheet that knows about people, not just sensors
+   PICTURE: top view of a truck at a junction, with the human variation points marked
+   COLOUR and TYPE: sky field, ink, orange only for hazards; Outfit 600 + Inter
+   LAYOUT: colour band with picture and figures, then metamodel, workbench, coverage, export, evaluation, plan */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0b1726);--ink:light-dark(#10223a,#e8f0f8);--mute:light-dark(#4c5d73,#9fb2c7);
+--sky:#4fb3e8;--skyd:light-dark(#d8eefa,#12324d);--org:#ff7a1a;--orgd:light-dark(#ffe6d4,#4a2610);
+--line:light-dark(#d5dee8,#22374f);--card:light-dark(#f4f8fb,#102236);--road:light-dark(#cfd9e3,#1e3048);--side:light-dark(#eef3f7,#0f2033)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Outfit,Inter,sans-serif;font-weight:600;line-height:1.1;text-wrap:balance;margin:0 0 .5em}
+h1{font-size:clamp(32px,4.6vw,50px);line-height:1.05}h2{font-size:clamp(24px,3vw,32px)}h3{font-size:19px}
+p{max-width:70ch;margin:0 0 1em}
+.band{padding:clamp(28px,4vw,64px) max(5vw,16px)}.wrap{max-width:1240px;margin:0 auto}
+.hero{background:var(--sky);color:#10223a}
+.hero .lede{font-size:17px;max-width:62ch}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;align-items:stretch;margin-top:24px}
+.scene{background:#fff;border-radius:14px;padding:10px;box-shadow:0 10px 30px rgba(16,34,58,.18)}
+.scene svg{width:100%;height:auto;display:block}
+.figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-content:start}
+.fig1{background:rgba(255,255,255,.55);border-radius:12px;padding:14px 16px}
+.fig1 b{display:block;font:600 clamp(30px,4vw,42px)/1 Outfit,sans-serif}
+.fig1 span{font-size:14px}
+.note{font-size:13px;color:var(--mute)}.hero .note{color:#1d3a5c}
+nav.scroll{display:flex;gap:6px;padding:10px max(5vw,16px);border-bottom:1px solid var(--line);background:var(--bg);white-space:nowrap}
+nav.scroll a{flex:none;color:var(--ink);text-decoration:none;padding:10px 12px;border-radius:8px;font-weight:500}
+nav.scroll a:hover,nav.scroll a:focus-visible{background:var(--skyd)}
+@media(min-width:900px){nav.scroll{position:sticky;top:0;z-index:5}}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.mbox{flex:1 1 150px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.mbox b{display:block;font-family:Outfit,sans-serif;font-size:17px}
+.mbox span{font-size:13px;color:var(--mute)}
+.mbox.h{background:var(--orgd);border-color:transparent}.mbox.s{background:var(--skyd);border-color:transparent}
+.dims{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}@media(max-width:800px){.dims{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.arrow{align-self:center;color:var(--mute);font-size:20px}
+@media(max-width:700px){.arrow{display:none}}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.tab{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-height:44px;cursor:pointer;text-align:left}
+.tab small{display:block;color:var(--mute);font-size:13px}
+.tab[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}.tab[aria-pressed=true] small{color:inherit;opacity:.8}
+.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--org);outline-offset:2px}
+.intended{background:var(--card);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:end}
+label{font-size:13px;color:var(--mute);display:block}
+select,input,textarea{font:16px Inter,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px;width:100%}
+textarea{min-height:80px;resize:vertical}
+.filters label{flex:1 1 180px}
+.split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+@media(max-width:980px){.split,.hero-grid{grid-template-columns:minmax(0,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-weight:600;text-align:left;font-size:13px;color:var(--mute);border-bottom:2px solid var(--line);padding:8px}
+td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
+tbody tr{cursor:pointer}tbody tr:hover{background:var(--card)}tbody tr.sel{background:var(--skyd)}
+td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.c-ind{background:var(--skyd)}.c-dir{background:var(--orgd)}.c-var{background:var(--card);border:1px solid var(--line)}
+.p-h{background:var(--org);color:#10223a}.p-m{background:var(--orgd)}.p-l{background:var(--card);border:1px solid var(--line)}
+.detail{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;position:sticky;top:72px}
+.detail dl{display:grid;grid-template-columns:9.5em minmax(0,1fr);gap:6px 12px;margin:0;font-size:14px}
+.detail dt{color:var(--mute)}.detail dd{margin:0}
+.detail ul{margin:0;padding-left:18px}
+.btn{font:600 15px Inter,sans-serif;background:var(--ink);color:var(--bg);border:0;border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.form .full{grid-column:1/-1}
+@media(max-width:600px){.form{grid-template-columns:minmax(0,1fr)}.detail dl{grid-template-columns:minmax(0,1fr)}.detail dt{margin-top:6px}}
+details.add{margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+details.add summary{cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center}
+.matrix td,.matrix th{text-align:center;padding:6px}.matrix th:first-child,.matrix td:first-child{text-align:left}
+.cell{display:block;border-radius:6px;padding:8px 4px;font-weight:600;font-variant-numeric:tabular-nums}
+.k0{background:transparent;border:1px dashed var(--org);color:var(--org)}.k1{background:var(--skyd)}.k2{background:color-mix(in srgb,var(--sky) 60%,var(--bg))}.k3{background:var(--sky);color:#10223a}
+pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:13px;max-height:460px;overflow:auto;white-space:pre}
+.q{border-bottom:1px solid var(--line);padding:12px 0}
+.likert{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.likert label{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--ink);font-size:15px}
+.likert input{position:absolute;opacity:0;width:1px;height:1px}
+.likert input:checked+span{font-weight:700}
+.likert label:has(input:checked){background:var(--ink);color:var(--bg)}
+.likert label:has(input:focus-visible){outline:3px solid var(--org)}
+.bar{height:12px;background:var(--card);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--sky)}
+.plan{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ph{background:var(--card);border-radius:10px;padding:14px;border-top:4px solid var(--sky)}
+.ph b{font-family:Outfit,sans-serif;font-size:16px;display:block}.ph span{font-size:13px;color:var(--mute)}
+@media(max-width:900px){.plan{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.plan,.figs{grid-template-columns:minmax(0,1fr)}}
+footer{border-top:1px solid var(--line)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.toast{transition:none}}
+pre,.scroll{overflow-x:auto}.scroll a{flex:none}code{overflow-wrap:anywhere}html{scroll-padding-top:72px}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}}
+</style><script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script></head>
+<body>
+
+<header class="band hero">
+<div class="wrap">
+<h1>Human variability as a SOTIF input: a specification model for driver and VRU interactions</h1>
+<p class="lede">A working prototype for the master's thesis "How Human Differences Affect Vehicle Safety". It shows how differences in perception, attention, experience and behaviour can be captured as structured, reusable specification entries that feed hazard analysis for reasonably foreseeable misuse under ISO 21448.</p>
+<div class="hero-grid">
+<div class="scene" role="img" aria-label="Top view of a truck at a junction. A cyclist waits in the blind-spot zone on the right, a pedestrian crosses ahead inside the emergency braking field, and the driver sits in the cab.">
+<svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" font-family="Inter,sans-serif">
+<rect width="600" height="380" fill="#eef3f7"/>
+<rect x="0" y="70" width="600" height="100" fill="#cfd9e3"/>
+<rect x="210" y="0" width="170" height="380" fill="#cfd9e3"/>
+<rect x="380" y="170" width="34" height="210" fill="#b9e0f5"/>
+<g fill="#fff">
+<rect x="295" y="200" width="3" height="28"/><rect x="295" y="250" width="3" height="28"/><rect x="295" y="300" width="3" height="28"/><rect x="295" y="350" width="3" height="28"/>
+<rect x="295" y="10" width="3" height="28"/>
+<rect x="20" y="119" width="30" height="3"/><rect x="80" y="119" width="30" height="3"/><rect x="140" y="119" width="30" height="3"/><rect x="420" y="119" width="30" height="3"/><rect x="480" y="119" width="30" height="3"/><rect x="540" y="119" width="30" height="3"/>
+</g>
+<g fill="#fff" opacity=".95"><rect x="218" y="174" width="14" height="22"/><rect x="242" y="174" width="14" height="22"/><rect x="266" y="174" width="14" height="22"/><rect x="290" y="174" width="14" height="22"/><rect x="314" y="174" width="14" height="22"/><rect x="338" y="174" width="14" height="22"/><rect x="362" y="174" width="14" height="22"/></g>
+<path d="M340 214 L262 118 L420 118 Z" fill="#4fb3e8" opacity=".35"/>
+<path d="M366 222 L432 206 L432 330 L366 322 Z" fill="#ff7a1a" opacity=".38"/>
+<rect x="310" y="214" width="56" height="50" rx="7" fill="#10223a"/>
+<rect x="316" y="216" width="44" height="12" rx="3" fill="#7fc6ee"/>
+<rect x="306" y="268" width="64" height="112" rx="4" fill="#4fb3e8" stroke="#10223a" stroke-width="2"/>
+<circle cx="330" cy="240" r="7" fill="#ff7a1a" stroke="#fff" stroke-width="2"/>
+<g transform="translate(397 262)"><ellipse cx="0" cy="-13" rx="4" ry="11" fill="none" stroke="#10223a" stroke-width="3"/><ellipse cx="0" cy="13" rx="4" ry="11" fill="none" stroke="#10223a" stroke-width="3"/><circle r="6" fill="#ff7a1a" stroke="#fff" stroke-width="2"/></g>
+<g transform="translate(286 185)"><circle r="7" fill="#ff7a1a" stroke="#fff" stroke-width="2"/></g>
+<g stroke="#10223a" stroke-width="1.4" fill="none"><path d="M280 186 L180 232"/><path d="M403 262 L452 262"/><path d="M324 244 L188 312"/><path d="M380 126 L452 50"/></g>
+<g fill="#10223a" font-size="14" font-weight="600">
+<text x="18" y="226">Pedestrian</text>
+<text x="458" y="250">Cyclist</text>
+<text x="18" y="306">Driver</text>
+<text x="458" y="38">AEB field</text>
+</g>
+<g fill="#4c5d73" font-size="12.5">
+<text x="18" y="244">attention, gap</text><text x="18" y="259">acceptance, size</text>
+<text x="458" y="268">speed, belief</text><text x="458" y="283">"they can see me"</text>
+<text x="18" y="324">mental model, trust,</text><text x="18" y="339">fatigue, alarm fatigue</text>
+<text x="458" y="56">detection limits</text>
+<text x="452" y="350" fill="#b4520c" font-weight="600">Blind-spot zone</text>
+</g>
+</svg>
+</div>
+<div class="figs" id="figs"></div>
+</div>
+<p class="note" style="margin-top:14px">Prototype by Praveen Saki. Independent work for the thesis application, not affiliated with or endorsed by Scania. All scenarios and S/C ratings are illustrative examples to show the method; they are not validated analysis results.</p>
+</div>
+</header>
+
+<nav class="scroll" aria-label="Sections">
+<a href="#model">Specification model</a><a href="#workbench">Workbench</a><a href="#coverage">Coverage</a><a href="#export">Export</a><a href="#evaluate">Evaluation</a><a href="#plan">Thesis plan</a>
+</nav>
+
+<section class="band" id="model"><div class="wrap">
+<h2>Each entry links a human difference to a SOTIF hazardous event</h2>
+<p>ISO 21448 considers intended use and reasonably foreseeable misuse together with potentially hazardous system behaviour. Here, <b>indirect misuse</b> means the person's deviation does not itself trigger the function, but combined with a functional insufficiency it creates or worsens a hazardous event (for example by reducing controllability). <b>Direct misuse</b> triggers hazardous behaviour on its own. <b>Variability-triggered</b> entries cover human differences that act as triggering conditions without any misuse, such as a VRU outside the perception system's expected appearance.</p>
+<div class="meta" aria-label="Metamodel chain">
+<div class="mbox s"><b>Function</b><span>Intended use, ODD, actor</span></div><div class="arrow">→</div>
+<div class="mbox s"><b>Human factor</b><span>One of 8 dimensions</span></div><div class="arrow">→</div>
+<div class="mbox s"><b>Variability</b><span>Range across the population</span></div><div class="arrow">→</div>
+<div class="mbox"><b>Deviation</b><span>What the person does differently</span></div><div class="arrow">→</div>
+<div class="mbox"><b>Triggering condition</b><span>System limit it meets</span></div><div class="arrow">→</div>
+<div class="mbox h"><b>Hazardous event</b><span>S and C rating</span></div><div class="arrow">→</div>
+<div class="mbox"><b>Measures and V&amp;V</b><span>Mitigation, test, evidence</span></div>
+</div>
+<h3 style="margin-top:26px">Eight human-factor dimensions</h3>
+<div class="dims" id="hfdims"></div>
+</div></section>
+
+<section class="band" id="workbench" style="background:var(--side)"><div class="wrap">
+<h2>Workbench: pick a function, filter, open an entry</h2>
+<div class="tabs" id="fntabs" role="group" aria-label="Vehicle function"></div>
+<div class="intended" id="intended"></div>
+<div class="filters">
+<label>Human factor<select id="fHF"></select></label>
+<label>Classification<select id="fType"><option value="">All</option><option>Indirect misuse</option><option>Direct misuse</option><option>Variability-triggered</option></select></label>
+<label>Actor<select id="fActor"><option value="">All</option><option>Driver</option><option>VRU</option></select></label>
+</div>
+<div class="split">
+<div><table class="stack" id="tbl"><thead><tr><th>ID</th><th>Actor</th><th>Human factor</th><th>Deviation</th><th>Class</th><th>S</th><th>C</th><th>Priority</th></tr></thead><tbody></tbody></table>
+<p class="note" id="empty" hidden>No entries match these filters.</p>
+<p class="note" style="margin-top:10px">Priority = S × C, a prototype screening heuristic for ordering analysis work, not an ASIL or SOTIF acceptance criterion.</p></div>
+<aside class="detail" id="detail" aria-live="polite"></aside>
+</div>
+<details class="add"><summary>Add a specification entry</summary>
+<form id="addForm" class="form">
+<label>Function<select id="aFn" required></select></label>
+<label>Actor<select id="aActor"><option>Driver</option><option>VRU</option></select></label>
+<label>Human factor<select id="aHF"></select></label>
+<label>Classification<select id="aType"><option>Indirect misuse</option><option>Direct misuse</option><option>Variability-triggered</option></select></label>
+<label class="full">Specific factor<input id="aFactor" required placeholder="e.g. Unfamiliar with retarder behaviour on long descents"></label>
+<label class="full">Variability across people<textarea id="aVar" required></textarea></label>
+<label class="full">Deviation from intended use<textarea id="aDev" required></textarea></label>
+<label>Triggering condition<textarea id="aTrig" required></textarea></label>
+<label>Hazardous event<textarea id="aHaz" required></textarea></label>
+<label>Severity<select id="aS"><option>0</option><option>1</option><option>2</option><option selected>3</option></select></label>
+<label>Controllability<select id="aC"><option>0</option><option>1</option><option selected>2</option><option>3</option></select></label>
+<label class="full">Measures (one per line)<textarea id="aMit"></textarea></label>
+<label class="full">Verification and validation idea<input id="aVV"></label>
+<div class="row full"><button class="btn" type="submit">Add entry</button><button class="btn ghost" type="button" id="resetCustom">Remove my added entries</button></div>
+</form>
+<p class="note">Added entries stay in this browser only.</p>
+</details>
+</div></section>
+
+<section class="band" id="coverage"><div class="wrap">
+<h2>Coverage shows where the analysis is still thin</h2>
+<p>Each cell counts entries per function and human-factor dimension. Dashed cells are gaps: either the dimension is irrelevant for that function, which should be argued and recorded, or it has not been analysed yet. This is one way to support completeness arguments in the SOTIF process.</p>
+<div class="scroll"><table class="matrix" id="matrix"></table></div>
+</div></section>
+
+<section class="band" id="export" style="background:var(--side)"><div class="wrap">
+<h2>Export as machine-readable model or specification text</h2>
+<p>The same entries render as JSON for tool integration (for example import into a HARA or requirements tool) or as structured specification statements for review.</p>
+<div class="row" style="margin-bottom:10px"><button class="btn ghost" id="vJson" aria-pressed="true">JSON</button><button class="btn ghost" id="vSpec" aria-pressed="false">Specification text</button><button class="btn" id="copyOut">Copy</button></div>
+<pre id="out"></pre>
+</div></section>
+
+<section class="band" id="evaluate"><div class="wrap">
+<h2>Evaluation with representative users</h2>
+<p>The thesis asks for an evaluation of reusability, information quality and SOTIF relevance. This questionnaire is the draft instrument, intended for safety engineers, HMI and human-factors specialists and function owners, combined with a short semi-structured interview. Try it; scores update as you answer.</p>
+<div class="split">
+<form id="evalForm"><label style="max-width:320px">Respondent role<select id="role"><option>Functional safety / SOTIF engineer</option><option>Human factors / HMI specialist</option><option>Function owner / system engineer</option><option>Test and validation engineer</option></select></label><div id="qs"></div></form>
+<aside class="detail"><h3>Scores by criterion</h3><div id="scores"></div><div class="row" style="margin-top:14px"><button class="btn" id="copyEval">Copy answers as CSV</button></div><p class="note" style="margin-top:10px">1 = strongly disagree, 5 = strongly agree.</p></aside>
+</div>
+</div></section>
+
+<section class="band" id="plan" style="background:var(--side)"><div class="wrap">
+<h2>Thesis plan: five phases, mapped to the deliverables</h2>
+<div class="plan">
+<div class="ph"><b>1. Scope</b><span>Weeks 1–3. Literature on SOTIF misuse, human factors taxonomies, HARA practice at Scania. Select 2 driver and 2 VRU functions.</span></div>
+<div class="ph"><b>2. Analyse</b><span>Weeks 4–8. HARA with focus on indirect misuse, workshops with function and safety teams. Compare current methods (HAZOP-style guidewords, STPA).</span></div>
+<div class="ph"><b>3. Model</b><span>Weeks 9–13. Refine the metamodel, variability ranges with sources, templates and this tool.</span></div>
+<div class="ph"><b>4. Evaluate</b><span>Weeks 14–17. Questionnaire and interviews with representative users: reusability, information quality, relevance.</span></div>
+<div class="ph"><b>5. Recommend</b><span>Weeks 18–20. Governance, ownership of the human-factor library, integration into SOTIF processes, report.</span></div>
+</div>
+<p style="margin-top:18px">Open questions I would like to discuss: which functions are most valuable to study, how HARA is currently documented, and whether the model should align with an existing tool or modelling language (for example SysML profiles or a feature-model notation for the variability).</p>
+</div></section>
+
+<footer class="band"><div class="wrap"><p class="note">Built by Praveen Saki as an application prototype. Scenario content, variability ranges and S/C ratings are illustrative and would be replaced by sourced data and expert judgement during the thesis. Severity and controllability use the S0–S3 and C0–C3 classes known from ISO 26262 and applied in ISO 21448 hazard evaluation.</p></div></footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+{
+const HF={P:["Perception","Vision, hearing, visual field"],A:["Attention","Distraction, secondary tasks"],C:["Cognition & mental model","Understanding of limits, mode awareness"],E:["Experience & training","Familiarity, habituation, fleet mix"],S:["Physiological state","Fatigue, workload, impairment"],M:["Motor & physical","Reach, strength, mobility, startle"],B:["Behavioural adaptation","Trust, risk compensation, gap acceptance"],D:["Anthropometric & demographic","Age, size, posture, aids, vehicle type"]};
+const FN=[
+{id:"ACC",name:"Adaptive Cruise Control",actor:"Driver",intended:"Keeps set speed and time gap to the vehicle ahead on highways and rural roads. The driver monitors traffic at all times and brakes when needed; deceleration authority is limited."},
+{id:"LKA",name:"Lane Keeping Assist",actor:"Driver",intended:"Applies corrective steering torque when the truck drifts out of a lane with visible markings. Hands on the wheel and continuous supervision are required."},
+{id:"AEB",name:"AEB with pedestrian and cyclist detection",actor:"VRU",intended:"Warns and brakes automatically when a collision with a detected pedestrian or cyclist ahead is imminent, to avoid or reduce impact speed."},
+{id:"TA",name:"Blind-spot and turn assist",actor:"VRU",intended:"Detects cyclists and pedestrians alongside and in front of the cab at low speed and warns the driver before moving off or turning towards the near side."}];
+const BASE=[
+{id:"ACC-01",fn:"ACC",actor:"Driver",hf:"C",factor:"Mental model of ACC limits",variability:"From drivers trained on the stationary-object limitation to drivers who assume ACC detects and stops for everything ahead.",deviation:"Delays braking when approaching a stationary queue, expecting ACC to stop the truck.",type:"Indirect misuse",trigger:"Stationary target at motorway speed outside the ACC design response.",hazard:"Rear-end collision with the end of a traffic queue.",S:3,C:2,mit:["Plain-language limitation statement in the HMI at activation","Forward collision warning that escalates independently of ACC","Short training module on ACC limits"],vv:"Simulator study with drivers of varying ACC experience; measure brake onset time.",evidence:"Driver interviews, field data on ACC use at queue ends."},
+{id:"ACC-02",fn:"ACC",actor:"Driver",hf:"B",factor:"Automation complacency on long hauls",variability:"Trust grows with uneventful exposure; monitoring may drop after hours of ACC driving.",deviation:"Monitors the road less and takes on secondary tasks.",type:"Indirect misuse",trigger:"Close cut-in needing more deceleration than ACC is allowed to apply.",hazard:"Collision with, or late harsh braking for, a cut-in vehicle.",S:2,C:2,mit:["Driver monitoring linking eyes-off-road time to warnings","Takeover request when the deceleration limit is reached"],vv:"Naturalistic data on glance behaviour against hours of ACC use.",evidence:"Fleet telematics, literature on automation complacency."},
+{id:"ACC-03",fn:"ACC",actor:"Driver",hf:"S",factor:"Fatigue and readiness to resume control",variability:"Alert at shift start to drowsy after night driving.",deviation:"Responds slowly to ACC deactivation or takeover request.",type:"Indirect misuse",trigger:"ACC deactivates when the radar is degraded (spray, low sun) and hands control back.",hazard:"Unmanaged closing speed after a missed deactivation.",S:3,C:2,mit:["Multimodal sound and haptic deactivation cue","Escalate cues when drowsiness detection is active"],vv:"Simulator with rested and fatigued participants; time to resume control.",evidence:"Shift pattern data, drowsiness detection logs."},
+{id:"ACC-04",fn:"ACC",actor:"Driver",hf:"E",factor:"Mode confusion after override",variability:"Drivers moving between truck generations or brands with different ACC resume logic.",deviation:"Believes ACC resumed after a brake tap or accelerator press when it is in standby.",type:"Indirect misuse",trigger:"ACC in standby while the driver thinks it is active.",hazard:"No automatic deceleration when the lead vehicle brakes.",S:2,C:2,mit:["Consistent, prominent mode indicator across the fleet","Audible cue on every mode transition"],vv:"Usability test of mode indicators with drivers from mixed fleets.",evidence:"Haulier interviews on fleet mix."},
+{id:"LKA-01",fn:"LKA",actor:"Driver",hf:"C",factor:"Expectations in road works",variability:"Some drivers know LKA can follow old markings; others assume it reads temporary lines.",deviation:"Lets LKA steer through road works with temporary yellow markings.",type:"Indirect misuse",trigger:"Conflicting old and temporary markings; LKA follows the wrong set.",hazard:"Lane departure into a barrier or adjacent traffic.",S:3,C:2,mit:["Suppress or degrade LKA when conflicting markings are detected, and say so","HMI message explaining why LKA is unavailable"],vv:"Scenario-based tests on test track with mixed markings.",evidence:"Road-works scenario catalogue."},
+{id:"LKA-02",fn:"LKA",actor:"Driver",hf:"B",factor:"Deliberate hands-off driving",variability:"A minority of drivers defeat hands-on detection to reduce effort.",deviation:"Uses a steering-wheel weight or knee to defeat hands-on detection.",type:"Direct misuse",trigger:"Hands-on detection defeated; LKA designed for assistance only.",hazard:"Unsupervised lane keeping beyond capability; departure on a curve.",S:3,C:3,mit:["Capacitive hands-on sensing in place of torque-only detection","Camera-based driver monitoring"],vv:"Defeat-device testing; review of misuse forums and service reports.",evidence:"Service and incident reports."},
+{id:"LKA-03",fn:"LKA",actor:"Driver",hf:"M",factor:"Startle response to steering torque",variability:"Differences in grip, arm reach, seat position and startle sensitivity.",deviation:"Counter-steers sharply when an unexpected LKA torque arrives.",type:"Indirect misuse",trigger:"LKA intervention on a false lane detection (tar seam, shadow).",hazard:"Over-correction and instability of a loaded trailer.",S:3,C:2,mit:["Gradual torque onset with haptic pre-cue","Limit torque at higher speeds with heavy load"],vv:"Simulator with a diverse driver sample; measure counter-steer magnitude.",evidence:"Anthropometric data for the driver population."},
+{id:"LKA-04",fn:"LKA",actor:"Driver",hf:"A",factor:"In-cab task load",variability:"Delivery drivers with navigation and dispatch apps glance away more often than long-haul drivers.",deviation:"Treats LKA as permission for longer glances away from the road.",type:"Indirect misuse",trigger:"LKA reaches its lateral limit and disengages on a sharp curve.",hazard:"Lane departure on a curve.",S:3,C:2,mit:["Disengagement warning with escalation","Lock dispatch app interaction while moving"],vv:"Glance-behaviour study with delivery and long-haul drivers.",evidence:"Task analysis of in-cab apps."},
+{id:"AEB-01",fn:"AEB",actor:"VRU",hf:"D",factor:"Pedestrian appearance and posture",variability:"Upright adults compared with children, wheelchair users, people pushing prams or walkers, or carrying large objects.",deviation:"None; the person is outside the typical appearance the detector expects.",type:"Variability-triggered",trigger:"Late or missed classification of an atypical silhouette.",hazard:"Pedestrian struck at higher impact speed.",S:3,C:3,mit:["Test and training data covering mobility aids and children","Generic object braking fallback at low speed"],vv:"Targeted test set with dummy variants; coverage metric per appearance class.",evidence:"Accident data by VRU group, dataset composition."},
+{id:"AEB-02",fn:"AEB",actor:"VRU",hf:"A",factor:"Distracted pedestrian",variability:"Phone use, headphones, children chasing a ball.",deviation:"Steps out from behind a parked vehicle without looking.",type:"Variability-triggered",trigger:"Appearance from occlusion leaves less time than detection plus braking needs.",hazard:"Pedestrian struck.",S:3,C:3,mit:["Lower urban speed in ODD where occlusion is common","Earlier pre-brake on partially visible VRUs"],vv:"Occlusion scenarios in simulation with varied step-out speeds.",evidence:"Pedestrian behaviour studies."},
+{id:"AEB-03",fn:"AEB",actor:"VRU",hf:"B",factor:"Gap acceptance in front of trucks",variability:"As AEB becomes known, some VRUs may accept shorter gaps, expecting vehicles to stop.",deviation:"Crosses close in front of a moving truck expecting it to brake automatically.",type:"Indirect misuse",trigger:"Heavy-truck stopping distance exceeds the remaining gap even with full AEB.",hazard:"Pedestrian struck.",S:3,C:3,mit:["External HMI or sound cue signalling the truck is not yielding","Public information on truck braking limits"],vv:"VR pedestrian study on gap acceptance with and without AEB awareness.",evidence:"Behavioural adaptation literature."},
+{id:"AEB-04",fn:"AEB",actor:"Driver",hf:"E",factor:"Trust erosion after false alarms",variability:"Drivers with frequent false warnings on their routes compared with drivers who rarely get them.",deviation:"Habitually overrides AEB with kickdown or switches it off at trip start.",type:"Indirect misuse",trigger:"A genuine VRU event while AEB is overridden or off.",hazard:"Collision with pedestrian or cyclist.",S:3,C:2,mit:["Reduce false positives on known route types","Log and review switch-off rates per route"],vv:"Field data on override and switch-off rates against false-positive rate.",evidence:"Fleet logs."},
+{id:"TA-01",fn:"TA",actor:"VRU",hf:"C",factor:"Cyclist belief about visibility",variability:"Cyclists who know truck blind spots compared with those who assume the driver sees them.",deviation:"Stops beside the front near-side corner at a red light.",type:"Indirect misuse",trigger:"Stationary cyclist at the edge of the moving-off detection zone.",hazard:"Cyclist run over when the truck moves off or turns.",S:3,C:3,mit:["Extend detection to the full front and near-side zone","Visibility awareness campaigns"],vv:"Field observation at junctions; detection zone coverage tests.",evidence:"Junction accident data."},
+{id:"TA-02",fn:"TA",actor:"VRU",hf:"D",factor:"Speed variability of micromobility",variability:"Conventional bicycles, pedelecs and e-scooters approach at very different speeds; speed pedelecs are faster still (ranges to be sourced).",deviation:"Approaches from behind faster than the warning timing assumes.",type:"Variability-triggered",trigger:"Warning issued too late for the driver to react.",hazard:"Collision during a near-side turn.",S:3,C:2,mit:["Warning timing based on measured approach speed","Rear-quarter sensing range sized for fast micromobility"],vv:"Test cases with varied approach speeds.",evidence:"Micromobility speed distributions."},
+{id:"TA-03",fn:"TA",actor:"Driver",hf:"E",factor:"Alarm fatigue in dense city traffic",variability:"Urban distribution drivers may receive many warnings per hour; long-haul drivers few.",deviation:"Ignores or mentally filters frequent blind-spot warnings.",type:"Indirect misuse",trigger:"A true warning ignored among many nuisance warnings.",hazard:"Cyclist struck during a turn.",S:3,C:2,mit:["Two-stage warning: information, then alert only with turn intent","Suppress warnings for VRUs moving away"],vv:"Warning-rate analysis on city routes; response study.",evidence:"Warning logs per route."},
+{id:"TA-04",fn:"TA",actor:"Driver",hf:"P",factor:"Hearing and visual-field differences",variability:"Age-related hearing loss, noisy cab or radio; warning lamp outside peripheral vision for some seat positions.",deviation:"Misses the warning.",type:"Variability-triggered",trigger:"Single-modality warning not perceived.",hazard:"Cyclist or pedestrian struck during a turn.",S:3,C:2,mit:["Redundant visual, acoustic and haptic cues","Lamp placement checked across seat positions"],vv:"Perception test with a sample covering age and seat positions.",evidence:"Anthropometric and hearing data."}];
+
+const KEY="hfv-custom-v1";
+let custom=[];try{custom=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){custom=[]}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(custom))}catch(e){}};
+const all=()=>BASE.concat(custom);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=id=>document.getElementById(id);
+const toast=m=>{const t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1600)};
+const prio=e=>{const p=e.S*e.C;return p>=6?["High","p-h"]:p>=3?["Medium","p-m"]:["Low","p-l"]};
+const tcls=t=>t==="Direct misuse"?"c-dir":t==="Indirect misuse"?"c-ind":"c-var";
+let selFn="ACC",selId=null,view="json";
+
+const opts=Object.entries(HF).map(([k,v])=>`<option value="${k}">${esc(v[0])}</option>`).join("");
+$("fHF").innerHTML='<option value="">All</option>'+opts;$("aHF").innerHTML=opts;
+$("aFn").innerHTML=FN.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("");
+$("hfdims").innerHTML=Object.entries(HF).map(([k,v])=>`<div class="mbox"><b>${esc(v[0])}</b><span>${esc(v[1])}</span></div>`).join("");
+
+function figs(){const a=all();const ind=a.filter(e=>e.type==="Indirect misuse").length;const hi=a.filter(e=>e.S*e.C>=6).length;
+$("figs").innerHTML=[[FN.length,"vehicle functions, 2 driver and 2 VRU"],[a.length,"specification entries"],[ind,"indirect-misuse entries"],[hi,"high-priority entries to analyse first"]].map(([n,l])=>`<div class="fig1"><b>${n}</b><span>${l}</span></div>`).join("")}
+
+function tabs(){$("fntabs").innerHTML=FN.map(f=>`<button class="tab" aria-pressed="${f.id===selFn}" data-fn="${f.id}">${esc(f.name)}<small>Main actor: ${f.actor} · ${all().filter(e=>e.fn===f.id).length} entries</small></button>`).join("");
+const f=FN.find(x=>x.id===selFn);$("intended").innerHTML=`<b>Intended use.</b> ${esc(f.intended)}`}
+
+function rows(){const hf=$("fHF").value,ty=$("fType").value,ac=$("fActor").value;
+const list=all().filter(e=>e.fn===selFn&&(!hf||e.hf===hf)&&(!ty||e.type===ty)&&(!ac||e.actor===ac));
+if(!list.find(e=>e.id===selId))selId=list[0]?.id||null;
+$("tbl").tBodies[0].innerHTML=list.map(e=>{const[p,pc]=prio(e);return `<tr data-id="${esc(e.id)}" class="${e.id===selId?"sel":""}" tabindex="0"><td style="white-space:nowrap"><b>${esc(e.id)}</b></td><td>${esc(e.actor)}</td><td>${esc(HF[e.hf]?.[0])}</td><td>${esc(e.deviation)}</td><td><span class="chip ${tcls(e.type)}">${esc(e.type)}</span></td><td class="n">S${e.S}</td><td class="n">C${e.C}</td><td><span class="chip ${pc}">${p}</span></td></tr>`}).join("");
+$("empty").hidden=list.length>0;detail()}
+
+function detail(){const e=all().find(x=>x.id===selId);if(!e){$("detail").innerHTML='<p class="note">Select an entry to see its full specification.</p>';return}
+const[p,pc]=prio(e);const isC=custom.some(c=>c.id===e.id);
+$("detail").innerHTML=`<h3>${esc(e.id)}: ${esc(e.factor)}</h3><p class="row" style="gap:6px"><span class="chip ${tcls(e.type)}">${esc(e.type)}</span><span class="chip ${pc}">${p} priority</span><span class="chip c-var">SOTIF area 2, known unsafe, until measures are verified</span></p>
+<dl><dt>Function</dt><dd>${esc(FN.find(f=>f.id===e.fn)?.name)}</dd><dt>Actor</dt><dd>${esc(e.actor)}</dd><dt>Human factor</dt><dd>${esc(HF[e.hf]?.[0])}</dd><dt>Variability</dt><dd>${esc(e.variability)}</dd><dt>Deviation</dt><dd>${esc(e.deviation)}</dd><dt>Triggering condition</dt><dd>${esc(e.trigger)}</dd><dt>Hazardous event</dt><dd>${esc(e.hazard)}</dd><dt>Severity / control</dt><dd>S${e.S} / C${e.C}</dd><dt>Measures</dt><dd><ul>${(e.mit||[]).map(m=>`<li>${esc(m)}</li>`).join("")||"<li>To be defined</li>"}</ul></dd><dt>V&amp;V</dt><dd>${esc(e.vv||"To be defined")}</dd><dt>Evidence needed</dt><dd>${esc(e.evidence||"To be defined")}</dd></dl>
+${isC?`<p style="margin-top:12px"><button class="btn ghost" id="delOne">Delete this entry</button></p>`:""}`;
+if(isC)$("delOne").onclick=()=>{custom=custom.filter(c=>c.id!==e.id);save();selId=null;renderAll();toast("Entry deleted")}}
+
+function matrix(){const a=all();const keys=Object.keys(HF);
+$("matrix").innerHTML=`<thead><tr><th>Function</th>${keys.map(k=>`<th title="${esc(HF[k][0])}">${esc(HF[k][0].split(" ")[0])}</th>`).join("")}<th>Total</th></tr></thead><tbody>${FN.map(f=>{const r=a.filter(e=>e.fn===f.id);return `<tr><td><b>${esc(f.name)}</b></td>${keys.map(k=>{const n=r.filter(e=>e.hf===k).length;return `<td><span class="cell k${Math.min(n,3)}" aria-label="${n} entries">${n||"gap"}</span></td>`}).join("")}<td class="n"><b>${r.length}</b></td></tr>`}).join("")}</tbody>`}
+
+function out(){const a=all();
+if(view==="json"){$("out").textContent=JSON.stringify({model:"HumanVariabilitySpec",version:"0.1-prototype",standardContext:"ISO 21448:2022 (SOTIF)",humanFactorDimensions:HF,functions:FN,entries:a},null,2)}
+else{$("out").textContent=a.map(e=>`${e.id}  [${e.type}]  S${e.S}/C${e.C}
+  GIVEN function ${FN.find(f=>f.id===e.fn)?.name} and actor ${e.actor}
+  WHERE ${HF[e.hf]?.[0]} varies: ${e.variability}
+  IF the person ${e.deviation.charAt(0).toLowerCase()+e.deviation.slice(1)}
+  AND ${e.trigger.charAt(0).toLowerCase()+e.trigger.slice(1)}
+  THEN hazardous event: ${e.hazard}
+  MEASURES: ${(e.mit||[]).map((m,i)=>`\n    ${e.id}-M${i+1}  ${m}`).join("")||" to be defined"}
+  V&V: ${e.vv||"to be defined"}`).join("\n\n")}
+$("vJson").setAttribute("aria-pressed",view==="json");$("vSpec").setAttribute("aria-pressed",view!=="json")}
+
+const QS=[["Reusability","The entries could be reused for a similar function on another vehicle programme."],["Reusability","The eight human-factor dimensions are general enough to apply across functions."],["Reusability","I could add a new entry without help."],["Information quality","Each entry contains the information I need to judge the hazard."],["Information quality","The entries are unambiguous and easy to understand."],["Information quality","Variability is described concretely enough to derive test cases."],["SOTIF relevance","The model helps identify reasonably foreseeable misuse that we would otherwise miss."],["SOTIF relevance","Entries trace clearly to triggering conditions and hazardous events."],["SOTIF relevance","The output could be integrated into our existing HARA and SOTIF work products."]];
+$("qs").innerHTML=QS.map((q,i)=>`<div class="q"><div><span class="chip c-var">${q[0]}</span> ${esc(q[1])}</div><div class="likert" role="radiogroup" aria-label="${esc(q[1])}">${[1,2,3,4,5].map(v=>`<label><input type="radio" name="q${i}" value="${v}"><span>${v}</span></label>`).join("")}</div></div>`).join("")+`<div class="q"><label for="qOpen">What is missing or should change?</label><textarea id="qOpen"></textarea></div>`;
+function scores(){const crit=[...new Set(QS.map(q=>q[0]))];
+$("scores").innerHTML=crit.map(c=>{const v=QS.map((q,i)=>q[0]===c?+(document.querySelector(`input[name=q${i}]:checked`)?.value||0):0).filter(x=>x);const m=v.length?v.reduce((a,b)=>a+b,0)/v.length:0;
+return `<div style="margin:10px 0"><div class="row" style="justify-content:space-between"><span>${c}</span><b>${m?m.toFixed(1):"–"} <span class="note">(${v.length}/3)</span></b></div><div class="bar"><i style="width:${m/5*100}%"></i></div></div>`}).join("")}
+
+function renderAll(){figs();tabs();rows();matrix();out()}
+
+$("fntabs").addEventListener("click",ev=>{const b=ev.target.closest("[data-fn]");if(!b)return;selFn=b.dataset.fn;selId=null;tabs();rows()});
+["fHF","fType","fActor"].forEach(id=>$(id).addEventListener("change",rows));
+const pick=ev=>{const tr=ev.target.closest("tr[data-id]");if(!tr)return;selId=tr.dataset.id;rows()};
+$("tbl").addEventListener("click",pick);$("tbl").addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();pick(ev)}});
+$("addForm").addEventListener("submit",ev=>{ev.preventDefault();const fn=$("aFn").value;const n=all().filter(e=>e.fn===fn).length+1;let id=`${fn}-${String(n).padStart(2,"0")}`;while(all().some(e=>e.id===id))id+="x";
+custom.push({id,fn,actor:$("aActor").value,hf:$("aHF").value,factor:$("aFactor").value.trim(),variability:$("aVar").value.trim(),deviation:$("aDev").value.trim(),type:$("aType").value,trigger:$("aTrig").value.trim(),hazard:$("aHaz").value.trim(),S:+$("aS").value,C:+$("aC").value,mit:$("aMit").value.split("\n").map(s=>s.trim()).filter(Boolean),vv:$("aVV").value.trim(),evidence:""});
+save();selFn=fn;selId=id;["fHF","fType","fActor"].forEach(i=>$(i).value="");ev.target.reset();renderAll();toast(`Added ${id}`);$("workbench").scrollIntoView({behavior:"smooth"})});
+$("resetCustom").onclick=()=>{if(!custom.length){toast("No added entries");return}custom=[];save();selId=null;renderAll();toast("Added entries removed")};
+$("vJson").onclick=()=>{view="json";out()};$("vSpec").onclick=()=>{view="spec";out()};
+const copy=async(txt,msg)=>{try{await navigator.clipboard.writeText(txt);toast(msg)}catch(e){toast("Copy blocked; select the text instead")}};
+$("copyOut").onclick=()=>copy($("out").textContent,"Copied");
+$("evalForm").addEventListener("change",scores);
+$("copyEval").onclick=()=>{const role=$("role").value;const lines=["role,criterion,item,score"].concat(QS.map((q,i)=>[role,q[0],q[1],document.querySelector(`input[name=q${i}]:checked`)?.value||""].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")));lines.push(`"${role}","Open","What is missing","${$("qOpen").value.replace(/"/g,'""')}"`);copy(lines.join("\n"),"Answers copied as CSV")};
+renderAll();scores();
+}
+</script>
+</body>
+</html>
